@@ -16,20 +16,32 @@
 
 ## 用法
 
+这个 step 跑完后，x-cmd 装在约定路径 `~/.x-cmd.root/` 下。两种调用方式：
+
 ```yaml
 steps:
   - uses: x-cmd-action/x-cmd@v1
-    id: x-cmd   # 任何 id；outputs.root 给出安装路径
 
-  - name: 用 x-cmd 做点事
-    shell: bash
-    run: |
-      . "${{ steps.x-cmd.outputs.root }}/X"
-      x cowsay "x-cmd is loaded"
-      x sysinfo | head -5
+  # 姿势 1：当成外部命令 —— 每次新建子 shell
+  - run: x-cmd cowsay "one-liner"
+
+  # 姿势 2：source X，把 x 当 shell 函数用（更快、共享状态）
+  - run: |
+      . ~/.x-cmd.root/X
+      x cowsay "loaded"
+      x cowsay "faster, no subshell overhead"
 ```
 
-`outputs.root` 是 x-cmd 安装的绝对路径（通常是 `~/.x-cmd.root`）。在需要用 `x` 的 shell 里 source `X`。
+`outputs.root` 是给诊断 / 非默认安装路径用的：
+
+```yaml
+- uses: x-cmd-action/x-cmd@v1
+  id: x-cmd
+
+- run: |
+    echo "installed at ${{ steps.x-cmd.outputs.root }}"
+    test -f "${{ steps.x-cmd.outputs.root }}/X"
+```
 
 ## Inputs
 

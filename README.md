@@ -16,20 +16,32 @@ This action is exactly the install step, nothing more.
 
 ## Usage
 
+After this step runs, x-cmd is at the conventional path `~/.x-cmd.root/`. Two ways to invoke it:
+
 ```yaml
 steps:
   - uses: x-cmd-action/x-cmd@v1
-    id: x-cmd   # any id you want; outputs.root gives you the install path
 
-  - name: do stuff with x-cmd
-    shell: bash
-    run: |
-      . "${{ steps.x-cmd.outputs.root }}/X"
-      x cowsay "x-cmd is loaded"
-      x sysinfo | head -5
+  # Option 1: as an external command — fresh subshell per call
+  - run: x-cmd cowsay "one-liner"
+
+  # Option 2: source X, then use `x` as a shell function (faster, shared state)
+  - run: |
+      . ~/.x-cmd.root/X
+      x cowsay "loaded"
+      x cowsay "faster, no subshell overhead"
 ```
 
-`outputs.root` is the path where x-cmd was installed (typically `~/.x-cmd.root`). Source the `X` file in any shell that wants to use `x`.
+The `outputs.root` is exposed for diagnostics or non-default install paths:
+
+```yaml
+- uses: x-cmd-action/x-cmd@v1
+  id: x-cmd
+
+- run: |
+    echo "installed at ${{ steps.x-cmd.outputs.root }}"
+    test -f "${{ steps.x-cmd.outputs.root }}/X"
+```
 
 ## Inputs
 
