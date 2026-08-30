@@ -47,7 +47,7 @@ The `outputs.root` is exposed for diagnostics or non-default install paths:
 
 | Input | Default | Description |
 | --- | --- | --- |
-| `channel` | `index.html` | Release channel: `index.html` (stable) / `x0` (canary) / `x1` (beta) / `x2` (dev). Maps to the `___X_CMD_GHACTION_X` env var used inside x-cmd. |
+| `channel` | `index.html` | Release channel. Options: `index.html` (stable) / `x7` (alpha) / `x6`, `x5`, `x4`, `x3`, `x2`, `x1` (experimental, x1 oldest, x6 newest) / `x0` (community development). Maps to the `___X_CMD_GHACTION_X` env var used inside x-cmd. |
 
 ## Outputs
 

@@ -47,7 +47,7 @@ steps:
 
 | Input | 默认 | 说明 |
 | --- | --- | --- |
-| `channel` | `index.html` | 发布通道：`index.html`（stable）/ `x0`（canary）/ `x1`（beta）/ `x2`（dev）。映射到 x-cmd 内部用的 `___X_CMD_GHACTION_X` 环境变量。 |
+| `channel` | `index.html` | 发布通道。可选：`index.html`（stable）/ `x7`（alpha）/ `x6`, `x5`, `x4`, `x3`, `x2`, `x1`（实验版，x1 最旧，x6 最新）/ `x0`（社区开发版）。映射到 x-cmd 内部用的 `___X_CMD_GHACTION_X` 环境变量。 |
 
 ## Outputs
 

@@ -9,7 +9,7 @@ description: |
 
 inputs:
   channel:
-    description: 'Release channel: index.html (stable) / x0 (canary) / x1 (beta) / x2 (dev)'
+    description: 'Release channel: index.html (stable) | x7 (alpha) | x1-x6 (experimental, x1 oldest, x6 newest) | x0 (community development)'
     required: false
     default: 'index.html'
 
