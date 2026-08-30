@@ -84,9 +84,18 @@ Use `x-cmd-action/x-cmd` when you want x-cmd alone. Use `x-cmd/action` when you 
 
 ## Why not just use `x-cmd/action`?
 
-`x-cmd/action` is great — but its init step does **seven things** (x-cmd install, SSH key, git config, workspace clone, docker login, docker buildx, ssh-agent). If you don't need most of them, you pay for setup you don't use, and your workflow's `env:` gets cluttered populated with `docker_*`, `ssh_key`, `ws_owner_repo`, etc. — even when those are empty strings.
+`x-cmd/action` is the right choice when you want the full bootstrap (x-cmd + SSH + git identity + docker + workspace clone + artifact upload). Each sub-step is gated by its inputs, so unused pieces don't run.
 
-This action is the alternative for "I just want x-cmd". Pull it in once, source `X` in your own steps, and stop fighting the bootstrap.
+This action is for the narrower case — "I just want x-cmd". Concretely the differences are:
+
+| | `x-cmd-action/x-cmd` | `x-cmd/action` |
+| --- | --- | --- |
+| Surface area | 1 input (`channel`), 1 output (`root`) | 17 inputs covering x-cmd, SSH, git, docker, workspace, artifact |
+| Idempotent install | ✅ skips if `~/.x-cmd.root/X` already exists | ❌ re-runs the curl every time (cheap, but not skipped) |
+| Outputs install path | ✅ `outputs.root` for downstream chaining | ❌ |
+| Scope | x-cmd only | x-cmd + everything you need to use it in a CI job |
+
+If you're starting a job from scratch and want SSH/git/docker/artifact all wired up, use `x-cmd/action`. If you just need `x` available and want to handle the rest yourself, this is smaller.
 
 ## License
 

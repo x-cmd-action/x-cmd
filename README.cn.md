@@ -84,9 +84,18 @@ action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 
 
 ## 为什么不直接用 `x-cmd/action`？
 
-`x-cmd/action` 很好 —— 但它的 init step **做七件事**（x-cmd install、SSH key、git config、workspace clone、docker login、docker buildx、ssh-agent）。如果你大多数不需要，你就在为你没用到的东西付 setup 时间，并且你 workflow 的 `env:` 里会堆一堆空字符串的 `docker_*`、`ssh_key`、`ws_owner_repo`。
+`x-cmd/action` 是"完整 bootstrap"场景的正确选择 —— x-cmd + SSH + git identity + docker + workspace clone + artifact 上传。每个子步骤按 input 守门，没传的就不跑。
 
-这个 action 是替代选项，专治"我只要 x-cmd"。拉进来一次，自己 source `X`，不用和 bootstrap 搏斗。
+这个 action 只处理更窄的场景 —— "我只要 x-cmd"。具体差别：
+
+| | `x-cmd-action/x-cmd` | `x-cmd/action` |
+| --- | --- | --- |
+| 表面 | 1 个 input（`channel`），1 个 output（`root`） | 17 个 input 覆盖 x-cmd、SSH、git、docker、workspace、artifact |
+| 幂等安装 | ✅ `~/.x-cmd.root/X` 已存在就跳过 | ❌ 每次都跑 curl（成本小但不跳过） |
+| 暴露安装路径 | ✅ `outputs.root` 给下游链式用 | ❌ |
+| 范围 | 仅 x-cmd | x-cmd + CI job 所需配套 |
+
+从零开始一个 job 想把 SSH/git/docker/artifact 都接好 → `x-cmd/action`。只想要 `x` 可用、剩下的自己处理 → 这个更小。
 
 ## 许可证
 
