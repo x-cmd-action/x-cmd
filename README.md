@@ -47,7 +47,7 @@ The `outputs.root` is exposed for diagnostics or non-default install paths:
 
 | Input | Default | Description |
 | --- | --- | --- |
-| `channel` | `index.html` | Release channel. Options: `index.html` (stable) / `x7` (alpha) / `x6`, `x5`, `x4`, `x3`, `x2`, `x1` (experimental, x1 oldest, x6 newest) / `x0` (community development). Maps to the `___X_CMD_GHACTION_X` env var used inside x-cmd. |
+| `stream` | `index.html` | Release stream. Options: `index.html` (stable) / `x7` (alpha) / `x6`, `x5`, `x4`, `x3`, `x2`, `x1` (experimental, x1 oldest, x6 newest) / `x0` (community development). Maps to the `___X_CMD_GHACTION_X` env var used inside x-cmd. |
 
 ## Outputs
 
@@ -90,7 +90,7 @@ This action is for the narrower case — "I just want x-cmd". Concretely the dif
 
 | | `x-cmd-action/x-cmd` | `x-cmd/action` |
 | --- | --- | --- |
-| Surface area | 1 input (`channel`), 1 output (`root`) | 17 inputs covering x-cmd, SSH, git, docker, workspace, artifact |
+| Surface area | 1 input (`stream`), 1 output (`root`) | 17 inputs covering x-cmd, SSH, git, docker, workspace, artifact |
 | Idempotent install | ✅ skips if `~/.x-cmd.root/X` already exists | ❌ re-runs the curl every time (cheap, but not skipped) |
 | Outputs install path | ✅ `outputs.root` for downstream chaining | ❌ |
 | Scope | x-cmd only | x-cmd + everything you need to use it in a CI job |

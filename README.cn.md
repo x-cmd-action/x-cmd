@@ -47,7 +47,7 @@ steps:
 
 | Input | 默认 | 说明 |
 | --- | --- | --- |
-| `channel` | `index.html` | 发布通道。可选：`index.html`（stable）/ `x7`（alpha）/ `x6`, `x5`, `x4`, `x3`, `x2`, `x1`（实验版，x1 最旧，x6 最新）/ `x0`（社区开发版）。映射到 x-cmd 内部用的 `___X_CMD_GHACTION_X` 环境变量。 |
+| `stream` | `index.html` | 发布流。可选：`index.html`（stable）/ `x7`（alpha）/ `x6`, `x5`, `x4`, `x3`, `x2`, `x1`（实验版，x1 最旧，x6 最新）/ `x0`（社区开发版）。映射到 x-cmd 内部用的 `___X_CMD_GHACTION_X` 环境变量。 |
 
 ## Outputs
 
@@ -90,7 +90,7 @@ action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 
 
 | | `x-cmd-action/x-cmd` | `x-cmd/action` |
 | --- | --- | --- |
-| 表面 | 1 个 input（`channel`），1 个 output（`root`） | 17 个 input 覆盖 x-cmd、SSH、git、docker、workspace、artifact |
+| 表面 | 1 个 input（`stream`），1 个 output（`root`） | 17 个 input 覆盖 x-cmd、SSH、git、docker、workspace、artifact |
 | 幂等安装 | ✅ `~/.x-cmd.root/X` 已存在就跳过 | ❌ 每次都跑 curl（成本小但不跳过） |
 | 暴露安装路径 | ✅ `outputs.root` 给下游链式用 | ❌ |
 | 范围 | 仅 x-cmd | x-cmd + CI job 所需配套 |

@@ -8,8 +8,8 @@ description: |
   the root output (see README for usage example).
 
 inputs:
-  channel:
-    description: 'Release channel: index.html (stable) | x7 (alpha) | x1-x6 (experimental, x1 oldest, x6 newest) | x0 (community development)'
+  stream:
+    description: 'Release stream: index.html (stable) | x7 (alpha) | x1-x6 (experimental, x1 oldest, x6 newest) | x0 (community development)'
     required: false
     default: 'index.html'
 
@@ -25,7 +25,7 @@ runs:
       id: install
       shell: bash
       env:
-        ___X_CMD_GHACTION_X: ${{ inputs.channel }}
+        ___X_CMD_GHACTION_X: ${{ inputs.stream }}
       run: |
         set +o errexit
 
@@ -33,7 +33,7 @@ runs:
         # This is the same install method used inside x-cmd/action's
         # `___x_cmd_ghaction_init_x_cmd` function (lib/index.sh line 12).
         if [ ! -f "$HOME/.x-cmd.root/X" ]; then
-            echo "Installing x-cmd (channel=$___X_CMD_GHACTION_X)..."
+            echo "Installing x-cmd (stream=$___X_CMD_GHACTION_X)..."
             eval "$(curl -fsSL \
                 "https://raw.githubusercontent.com/x-cmd/get/main/$___X_CMD_GHACTION_X")"
         else
