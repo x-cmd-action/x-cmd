@@ -55,19 +55,6 @@ steps:
 | --- | --- |
 | `root` | x-cmd 安装的绝对路径（`X` 文件所在的目录）。 |
 
-## 原理
-
-action 只做一件事 —— 从 [`x-cmd/get`](https://github.com/x-cmd/get) `eval` 装 x-cmd：
-
-```bash
-eval "$(curl -fsSL \
-    "https://raw.githubusercontent.com/x-cmd/get/main/$___X_CMD_GHACTION_X")"
-```
-
-完事。和 `x-cmd/action` 内部 `___x_cmd_ghaction_init_x_cmd`（`lib/index.sh` 第 12 行）做的一模一样，只是没包 SSH/git/docker 那层壳。
-
-action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 job 多次调用，开销是 ~100ms（只查个文件），不是 ~5s（重下整套）。
-
 ## 对比
 
 | | `x-cmd-action/x-cmd` | `x-cmd/action` |
@@ -81,23 +68,6 @@ action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 
 | `root` 路径 output | ✅ | ❌ |
 
 只想要 x-cmd → 用 `x-cmd-action/x-cmd`。想要全套 bootstrap → 用 `x-cmd/action`。
-
-## 它跟其它 action 的关系
-
-`x-cmd-action/x-cmd` 是 `x-cmd-action` org 里**几个同级 action 之一** —— 各自只做一件事，互相不依赖：
-
-- **`x-cmd-action/x-cmd`** —— 装 x-cmd（这个 action）
-- **`x-cmd-action/checkout`** —— 把 repo 克隆进 workspace
-- **`x-cmd-action/gitmirror`** —— 跨平台同步 repo
-
-需要哪个就拿哪个，可以自由组合，不会重叠。
-
-**它不是 `x-cmd/action` 的"小子集"**。两者是不同的工具：
-
-- **`x-cmd/action`**（独立仓库，不在这 org）装 x-cmd 并且**默认你会用 x-cmd 命令做剩下的事** —— `x gitb`、`x ws` 等等。action 的职责是"让 runner 准备好 x-cmd"，你的脚本的职责是"用 x-cmd 把活干完"。
-- **`x-cmd-action/x-cmd`** 只装 x-cmd。它不假设你后面都用 x-cmd —— 剩下的用别的 action 就行。
-
-CI 是"x-cmd 一统天下"风格 → 用 `x-cmd/action`。想要 x-cmd 同时和其它工具混用 → 用这个。
 
 ## 许可证
 

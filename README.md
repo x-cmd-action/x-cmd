@@ -55,19 +55,6 @@ The `outputs.root` is exposed for diagnostics or non-default install paths:
 | --- | --- |
 | `root` | Absolute path to the x-cmd install (where `X` lives). |
 
-## How it works
-
-The action does one thing — `eval` the x-cmd installer from [`x-cmd/get`](https://github.com/x-cmd/get):
-
-```bash
-eval "$(curl -fsSL \
-    "https://raw.githubusercontent.com/x-cmd/get/main/$___X_CMD_GHACTION_X")"
-```
-
-That's it. Identical to what `x-cmd/action` does internally in `___x_cmd_ghaction_init_x_cmd` (`lib/index.sh` line 12), just without the surrounding SSH/git/docker wiring.
-
-The action is **idempotent**: if `~/.x-cmd.root/X` already exists, the install step is skipped. So calling it multiple times in the same job costs ~100ms (just the file check) instead of ~5s (full download).
-
 ## Comparison
 
 | | `x-cmd-action/x-cmd` | `x-cmd/action` |
@@ -81,23 +68,6 @@ The action is **idempotent**: if `~/.x-cmd.root/X` already exists, the install s
 | Output: `root` path | ✅ | ❌ |
 
 Use `x-cmd-action/x-cmd` when you want x-cmd alone. Use `x-cmd/action` when you want the full bootstrap package.
-
-## How it relates to other actions
-
-`x-cmd-action/x-cmd` is **one of several sibling actions** in the `x-cmd-action` org — each does one thing, none depend on the others:
-
-- **`x-cmd-action/x-cmd`** — install x-cmd *(this action)*
-- **`x-cmd-action/checkout`** — clone a repo into the workspace
-- **`x-cmd-action/gitmirror`** — sync repos across platforms
-
-Pick whichever you need; combine freely; they don't overlap.
-
-It is **not** a "minimal subset of `x-cmd/action`". Those are different tools:
-
-- **`x-cmd/action`** (separate repo, not in this org) installs x-cmd AND assumes you'll do the rest of the CI with x-cmd commands themselves — `x gitb`, `x ws`, etc. The action's job is "make the runner x-cmd-ready". Your script's job is "do everything via x-cmd".
-- **`x-cmd-action/x-cmd`** just installs x-cmd. It doesn't presume you'll use x-cmd for everything — use whatever other actions make sense for the rest of the job.
-
-Use `x-cmd/action` when your CI is "x-cmd-everywhere". Use `x-cmd-action/x-cmd` when you want x-cmd alongside other tooling.
 
 ## License
 
