@@ -82,20 +82,22 @@ action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 
 
 只想要 x-cmd → 用 `x-cmd-action/x-cmd`。想要全套 bootstrap → 用 `x-cmd/action`。
 
-## 为什么不直接用 `x-cmd/action`？
+## 它跟其它 action 的关系
 
-`x-cmd/action` 是"完整 bootstrap"场景的正确选择 —— x-cmd + SSH + git identity + docker + workspace clone + artifact 上传。每个子步骤按 input 守门，没传的就不跑。
+`x-cmd-action/x-cmd` 是 `x-cmd-action` org 里**几个同级 action 之一** —— 各自只做一件事，互相不依赖：
 
-这个 action 只处理更窄的场景 —— "我只要 x-cmd"。具体差别：
+- **`x-cmd-action/x-cmd`** —— 装 x-cmd（这个 action）
+- **`x-cmd-action/checkout`** —— 把 repo 克隆进 workspace
+- **`x-cmd-action/gitmirror`** —— 跨平台同步 repo
 
-| | `x-cmd-action/x-cmd` | `x-cmd/action` |
-| --- | --- | --- |
-| 表面 | 1 个 input（`stream`），1 个 output（`root`） | 17 个 input 覆盖 x-cmd、SSH、git、docker、workspace、artifact |
-| 幂等安装 | ✅ `~/.x-cmd.root/X` 已存在就跳过 | ❌ 每次都跑 curl（成本小但不跳过） |
-| 暴露安装路径 | ✅ `outputs.root` 给下游链式用 | ❌ |
-| 范围 | 仅 x-cmd | x-cmd + CI job 所需配套 |
+需要哪个就拿哪个，可以自由组合，不会重叠。
 
-从零开始一个 job 想把 SSH/git/docker/artifact 都接好 → `x-cmd/action`。只想要 `x` 可用、剩下的自己处理 → 这个更小。
+**它不是 `x-cmd/action` 的"小子集"**。两者是不同的工具：
+
+- **`x-cmd/action`**（独立仓库，不在这 org）装 x-cmd 并且**默认你会用 x-cmd 命令做剩下的事** —— `x gitb`、`x ws` 等等。action 的职责是"让 runner 准备好 x-cmd"，你的脚本的职责是"用 x-cmd 把活干完"。
+- **`x-cmd-action/x-cmd`** 只装 x-cmd。它不假设你后面都用 x-cmd —— 剩下的用别的 action 就行。
+
+CI 是"x-cmd 一统天下"风格 → 用 `x-cmd/action`。想要 x-cmd 同时和其它工具混用 → 用这个。
 
 ## 许可证
 

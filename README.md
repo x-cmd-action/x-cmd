@@ -82,20 +82,22 @@ The action is **idempotent**: if `~/.x-cmd.root/X` already exists, the install s
 
 Use `x-cmd-action/x-cmd` when you want x-cmd alone. Use `x-cmd/action` when you want the full bootstrap package.
 
-## Why not just use `x-cmd/action`?
+## How it relates to other actions
 
-`x-cmd/action` is the right choice when you want the full bootstrap (x-cmd + SSH + git identity + docker + workspace clone + artifact upload). Each sub-step is gated by its inputs, so unused pieces don't run.
+`x-cmd-action/x-cmd` is **one of several sibling actions** in the `x-cmd-action` org — each does one thing, none depend on the others:
 
-This action is for the narrower case — "I just want x-cmd". Concretely the differences are:
+- **`x-cmd-action/x-cmd`** — install x-cmd *(this action)*
+- **`x-cmd-action/checkout`** — clone a repo into the workspace
+- **`x-cmd-action/gitmirror`** — sync repos across platforms
 
-| | `x-cmd-action/x-cmd` | `x-cmd/action` |
-| --- | --- | --- |
-| Surface area | 1 input (`stream`), 1 output (`root`) | 17 inputs covering x-cmd, SSH, git, docker, workspace, artifact |
-| Idempotent install | ✅ skips if `~/.x-cmd.root/X` already exists | ❌ re-runs the curl every time (cheap, but not skipped) |
-| Outputs install path | ✅ `outputs.root` for downstream chaining | ❌ |
-| Scope | x-cmd only | x-cmd + everything you need to use it in a CI job |
+Pick whichever you need; combine freely; they don't overlap.
 
-If you're starting a job from scratch and want SSH/git/docker/artifact all wired up, use `x-cmd/action`. If you just need `x` available and want to handle the rest yourself, this is smaller.
+It is **not** a "minimal subset of `x-cmd/action`". Those are different tools:
+
+- **`x-cmd/action`** (separate repo, not in this org) installs x-cmd AND assumes you'll do the rest of the CI with x-cmd commands themselves — `x gitb`, `x ws`, etc. The action's job is "make the runner x-cmd-ready". Your script's job is "do everything via x-cmd".
+- **`x-cmd-action/x-cmd`** just installs x-cmd. It doesn't presume you'll use x-cmd for everything — use whatever other actions make sense for the rest of the job.
+
+Use `x-cmd/action` when your CI is "x-cmd-everywhere". Use `x-cmd-action/x-cmd` when you want x-cmd alongside other tooling.
 
 ## License
 
