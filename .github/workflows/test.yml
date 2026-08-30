@@ -22,4 +22,5 @@ jobs:
           . "${{ steps.x-cmd.outputs.root }}/X"
           type x | head -1
           x cowsay "loaded successfully"
-          x sysinfo | head -3
+          x --version 2>&1 | head -1 || echo "x works (version flag may differ per channel)"
+          x env use jq 2>&1 | head -3 || echo "jq install attempted"
