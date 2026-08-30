@@ -4,8 +4,8 @@ description: |
   into ~/.x-cmd.root/. Does one thing only — the install step from
   x-cmd/action, factored out as a standalone action.
 
-  After this step, downstream shell steps can `source` the X file:
-      . "${{ steps.x-cmd.outputs.root }}/X"
+  After this step, downstream shell steps can source the X file using
+  the root output (see README for usage example).
 
 inputs:
   channel:
