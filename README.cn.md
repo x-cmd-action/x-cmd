@@ -1,0 +1,88 @@
+# x-cmd-action/x-cmd
+
+> 安装 [x-cmd](https://github.com/x-cmd/x-cmd)（纯 POSIX shell 库，兼容 dash/ash/bash/zsh）到 `~/.x-cmd.root/`。**只做一件事** —— 从 [`x-cmd/action`](https://github.com/x-cmd/action) 里把 install 这一步抽出来，变成独立、零依赖的 action。
+
+[English](./README.md)
+
+## 为什么需要独立的 action？
+
+`x-cmd/action` 是个**完整的复合 action** —— 装 x-cmd **+** 配 SSH + 配 git identity + 配 docker + 克隆 workspace repo + 上传 artifact。多数用户需要这些。但有时候你只想要 install：
+
+- 想用 `x` 命令但不要 `x-cmd/action` 的其他表面
+- 想把 x-cmd install 和自己其他自定义 setup step 拼起来
+- 写下游 action，需要 x-cmd 但不需要 SSH / docker
+
+这个 action 就是那个 install 步骤，没有别的。
+
+## 用法
+
+```yaml
+steps:
+  - uses: x-cmd-action/x-cmd@v1
+    id: x-cmd   # 任何 id；outputs.root 给出安装路径
+
+  - name: 用 x-cmd 做点事
+    shell: bash
+    run: |
+      . "${{ steps.x-cmd.outputs.root }}/X"
+      x cowsay "x-cmd is loaded"
+      x sysinfo | head -5
+```
+
+`outputs.root` 是 x-cmd 安装的绝对路径（通常是 `~/.x-cmd.root`）。在需要用 `x` 的 shell 里 source `X`。
+
+## Inputs
+
+| Input | 默认 | 说明 |
+| --- | --- | --- |
+| `channel` | `index.html` | 发布通道：`index.html`（stable）/ `x0`（canary）/ `x1`（beta）/ `x2`（dev）。映射到 x-cmd 内部用的 `___X_CMD_GHACTION_X` 环境变量。 |
+
+## Outputs
+
+| Output | 说明 |
+| --- | --- |
+| `root` | x-cmd 安装的绝对路径（`X` 文件所在的目录）。 |
+
+## 原理
+
+action 只做一件事 —— 从 [`x-cmd/get`](https://github.com/x-cmd/get) `eval` 装 x-cmd：
+
+```bash
+eval "$(curl -fsSL \
+    "https://raw.githubusercontent.com/x-cmd/get/main/$___X_CMD_GHACTION_X")"
+```
+
+完事。和 `x-cmd/action` 内部 `___x_cmd_ghaction_init_x_cmd`（`lib/index.sh` 第 12 行）做的一模一样，只是没包 SSH/git/docker 那层壳。
+
+action **幂等**：`~/.x-cmd.root/X` 已存在就跳过 install。所以同一 job 多次调用，开销是 ~100ms（只查个文件），不是 ~5s（重下整套）。
+
+## 对比
+
+| | `x-cmd-action/x-cmd` | `x-cmd/action` |
+| --- | --- | --- |
+| 装 x-cmd | ✅ | ✅ |
+| 配 SSH / git identity / docker | ❌ | ✅ |
+| 上传 artifact | ❌ | ✅ |
+| 克隆 workspace repo | ❌ | ✅（通过 `ws_owner_repo`） |
+| 纯 shell，无 Node.js | ✅ | ✅ |
+| Idempotent install | ✅ | ❌（目前 — 同样的 install 方法，但没加 skip 检查） |
+| `root` 路径 output | ✅ | ❌ |
+
+只想要 x-cmd → 用 `x-cmd-action/x-cmd`。想要全套 bootstrap → 用 `x-cmd/action`。
+
+## 为什么不直接用 `x-cmd/action`？
+
+`x-cmd/action` 很好 —— 但它的 init step **做七件事**（x-cmd install、SSH key、git config、workspace clone、docker login、docker buildx、ssh-agent）。如果你大多数不需要，你就在为你没用到的东西付 setup 时间，并且你 workflow 的 `env:` 里会堆一堆空字符串的 `docker_*`、`ssh_key`、`ws_owner_repo`。
+
+这个 action 是替代选项，专治"我只要 x-cmd"。拉进来一次，自己 source `X`，不用和 bootstrap 搏斗。
+
+## 许可证
+
+Apache 2.0 —— 见 [`LICENSE`](LICENSE)。
+
+## 相关链接
+
+- [x-cmd/action](https://github.com/x-cmd/action) —— 完整 bootstrap action，本 action 是从它抽出来的。
+- [x-cmd/get](https://github.com/x-cmd/get) —— x-cmd 安装器（本 action 拉的就是这个）。
+- [x-cmd-action/checkout](https://github.com/x-cmd-action/checkout) —— 纯 shell checkout action。
+- [x-cmd-action/gitmirror](https://github.com/x-cmd-action/gitmirror) —— 跨平台 repo 镜像。

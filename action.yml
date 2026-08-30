@@ -1,0 +1,52 @@
+name: x-cmd
+description: |
+  Install x-cmd (pure-POSIX shell library, works in dash/ash/bash/zsh)
+  into ~/.x-cmd.root/. Does one thing only — the install step from
+  x-cmd/action, factored out as a standalone action.
+
+  After this step, downstream shell steps can `source` the X file:
+      . "${{ steps.x-cmd.outputs.root }}/X"
+
+inputs:
+  channel:
+    description: 'Release channel: index.html (stable) / x0 (canary) / x1 (beta) / x2 (dev)'
+    required: false
+    default: 'index.html'
+
+outputs:
+  root:
+    description: 'Where x-cmd was installed (typically ~/.x-cmd.root)'
+    value: ${{ steps.install.outputs.root }}
+
+runs:
+  using: composite
+  steps:
+    - name: install x-cmd
+      id: install
+      shell: bash
+      env:
+        ___X_CMD_GHACTION_X: ${{ inputs.channel }}
+      run: |
+        set +o errexit
+
+        # Idempotent: if x-cmd is already installed, skip the curl.
+        # This is the same install method used inside x-cmd/action's
+        # `___x_cmd_ghaction_init_x_cmd` function (lib/index.sh line 12).
+        if [ ! -f "$HOME/.x-cmd.root/X" ]; then
+            echo "Installing x-cmd (channel=$___X_CMD_GHACTION_X)..."
+            eval "$(curl -fsSL \
+                "https://raw.githubusercontent.com/x-cmd/get/main/$___X_CMD_GHACTION_X")"
+        else
+            echo "x-cmd already installed at $HOME/.x-cmd.root, skipping"
+        fi
+
+        # The install script exports X_CMD_ROOT, but fall back to the
+        # conventional location in case it doesn't.
+        X_CMD_ROOT="${X_CMD_ROOT:-$HOME/.x-cmd.root}"
+        if [ ! -f "$X_CMD_ROOT/X" ]; then
+            echo "ERROR: x-cmd install did not produce $X_CMD_ROOT/X" >&2
+            exit 1
+        fi
+
+        echo "x-cmd ready at $X_CMD_ROOT"
+        echo "root=$X_CMD_ROOT" >> "$GITHUB_OUTPUT"

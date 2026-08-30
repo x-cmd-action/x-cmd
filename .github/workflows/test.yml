@@ -1,0 +1,25 @@
+name: test-install
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: x-cmd-action/x-cmd@main
+        id: x-cmd
+
+      - name: verify install path output
+        run: |
+          ROOT="${{ steps.x-cmd.outputs.root }}"
+          echo "outputs.root = $ROOT"
+          test -f "$ROOT/X" && echo "OK: X file present at $ROOT/X"
+          test -d "$ROOT" && echo "OK: install dir exists"
+
+      - name: use x-cmd after install
+        shell: bash
+        run: |
+          . "${{ steps.x-cmd.outputs.root }}/X"
+          type x | head -1
+          x cowsay "loaded successfully"
+          x sysinfo | head -3
